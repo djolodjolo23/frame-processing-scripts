@@ -39,7 +39,7 @@ while True:
 
     current_frame += 1
 
-    if current_frame == 360:
+    if current_frame == 360: # stopping point for now
         break
 
 cap.release()
