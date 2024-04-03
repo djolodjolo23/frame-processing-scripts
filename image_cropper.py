@@ -18,7 +18,6 @@ xtl, ytl, xbr, ybr = 1053.22, 257.82, 1226.26, 336.11
 
 # Calculate the bounding box's width and height
 bbox_center = ((xtl + xbr) / 2, (ytl + ybr) / 2)
-
 bbox_width = xbr - xtl
 bbox_height = ybr - ytl
 
