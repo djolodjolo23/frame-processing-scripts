@@ -1,66 +1,74 @@
 from PIL import Image, ImageDraw
+import xml.etree.ElementTree as ET
 import os
 
-if not os.path.exists('cropped'):
-    os.makedirs('cropped')
-
-image_path = 'frames/frame_7.jpg'
-original_image = Image.open(image_path)
-
+min_square_size = 400  #testing with 400x400
+video_name = 'GX011088'
+folder_path = 'frames'
+initial_xml = 'annotations.xml'
 
 
-# Parameters for the new square image and bounding box coordinates
-square_size = 500
+cropped_folder_path = f'cropped/{video_name}'
+os.makedirs(cropped_folder_path, exist_ok=True)
 
-# Parameters for the new square image, bounding box coordinates, and padding
-padding = 50  # Padding around the bounding box
-xtl, ytl, xbr, ybr = 1053.22, 257.82, 1226.26, 336.11
+tree = ET.parse(initial_xml)
+root = tree.getroot()
 
-# Calculate the bounding box's width and height
-bbox_center = ((xtl + xbr) / 2, (ytl + ybr) / 2)
-bbox_width = xbr - xtl
-bbox_height = ybr - ytl
+for track in root.findall('.//track'):
+    if track.attrib.get('label') == 'queen':
+        for box in track.findall('box'):
+            frame_num = box.attrib['frame']
+            if int(frame_num) == 200:
+                break  # Stopping point for now
 
-# Determine the size of the square based on the larger dimension of the bounding box and padding
-square_size = max(bbox_width, bbox_height) + 2 * padding
+            image_path = os.path.join(folder_path, f'frames_{video_name}/frame_{frame_num}.jpg')
+            if not os.path.exists(image_path):
+                continue
 
-# Load the original image
-original_image = Image.open(image_path)
+            original_image = Image.open(image_path)
+            xtl, ytl, xbr, ybr = [float(box.attrib[attr]) for attr in ['xtl', 'ytl', 'xbr', 'ybr']]
 
-# Create a new square image with a white background
-new_image = Image.new('RGB', (int(square_size), int(square_size)), (255, 255, 255))
+            bbox_width = xbr - xtl
+            bbox_height = ybr - ytl
 
-# Calculate the new bounding box's position in the square image, ensuring it is centered
-new_bbox_x = (square_size - bbox_width) / 2
-new_bbox_y = (square_size - bbox_height) / 2
+            initial_square_size = max(bbox_width, bbox_height)
 
-# Calculate the crop box coordinates, ensuring we do not go out of bounds
-crop_left = max(bbox_center[0] - (square_size / 2), 0)
-crop_upper = max(bbox_center[1] - (square_size / 2), 0)
-crop_right = min(crop_left + square_size, original_image.width)
-crop_lower = min(crop_upper + square_size, original_image.height)
+            padding_height = (min_square_size - bbox_height) / 2
+            padding_width = (min_square_size - bbox_width) / 2
 
-cropped_area = original_image.crop((int(crop_left), int(crop_upper), int(crop_right), int(crop_lower)))
+            # the new square crop area values
+            crop_left = xtl - padding_width
+            crop_upper = ytl - padding_height
+            crop_right = xbr + padding_width
+            crop_lower = ybr + padding_height
 
-# Resize the cropped area to fit the square size if it's larger than the intended square
-if cropped_area.width > square_size or cropped_area.height > square_size:
-    cropped_area = cropped_area.resize((int(square_size), int(square_size)), Image.Resampling.LANCZOS)
+            cropped_area = original_image.crop((int(crop_left), int(crop_upper), int(crop_right), int(crop_lower)))
+            new_image = Image.new('RGB', (min_square_size, min_square_size), (255, 255, 255))
+            # pasting the cropped image to the new image
+            paste_x = (min_square_size - cropped_area.width) // 2
+            paste_y = (min_square_size - cropped_area.height) // 2
+            new_image.paste(cropped_area, (paste_x, paste_y))
 
-# Calculate the position to paste the cropped area onto the new square image
-paste_x = (new_image.width - cropped_area.width) // 2
-paste_y = (new_image.height - cropped_area.height) // 2
+            # new bounding box of an obj in the new image
+            #new_bbox_x = (min_square_size - bbox_width) / 2
+            #new_bbox_y = (min_square_size - bbox_height) / 2
+            new_tlx = padding_width
+            new_tly = padding_height
+            new_brx = padding_width + bbox_width
+            new_bry = padding_height + bbox_height
 
-# Paste the cropped area onto the new square image
-new_image.paste(cropped_area, (paste_x, paste_y))
+            box.set('xtl', str(new_tlx))
+            box.set('ytl', str(new_tly))
+            box.set('xbr', str(new_brx))
+            box.set('ybr', str(new_bry))
 
-# Draw the bounding box on the new image
-draw = ImageDraw.Draw(new_image)
-draw.rectangle([(paste_x + new_bbox_x, paste_y + new_bbox_y), 
-                (paste_x + new_bbox_x + bbox_width, paste_y + new_bbox_y + bbox_height)], 
-                outline="red", width=2)
+            draw = ImageDraw.Draw(new_image)
+            draw.rectangle([(new_tlx, new_tly), (new_brx, new_bry)], outline='red', width=3)
+            #draw.rectangle([(paste_x + new_bbox_x, paste_y + new_bbox_y),
+                            #(paste_x + new_bbox_x + bbox_width, paste_y + new_bbox_y + bbox_height)],
+                           #outline="red", width=2)
 
-# Save the new square image with the object and padding
-output_path_with_object_and_padding = 'cropped/square_frame_7.jpg'
-new_image.save(output_path_with_object_and_padding)
+            new_image.save(f'cropped/{video_name}/cropped_frame{frame_num}.jpg')
 
-output_path_with_object_and_padding
+new_xml_path = f'annotations_{video_name}.xml'
+tree.write(new_xml_path)
