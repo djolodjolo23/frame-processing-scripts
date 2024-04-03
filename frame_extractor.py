@@ -40,7 +40,7 @@ while True:
         cv2.imwrite(frame_path, frame)
     current_frame += 1
 
-    if current_frame == 200:  # stopping point for now
+    if current_frame == 359:  # stopping point for now
         break
 
 cap.release()
