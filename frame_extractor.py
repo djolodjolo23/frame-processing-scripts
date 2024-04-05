@@ -1,45 +1,57 @@
 import cv2
 import xml.etree.ElementTree as ET
 import os
+import argparse
 
 
 def parse_xml(xml_file):
     tree = ET.parse(xml_file)
     root = tree.getroot()
-    frame_nums = []
+    frame_numbers = []
 
     for track in root.findall('track'):
         if track.attrib['label'] == 'queen':
             for box in track.findall('./box'):
-                frame_nums.append(int(box.attrib['frame']))
+                frame_numbers.append(int(box.attrib['frame']))
 
-    return frame_nums
-
-
-if not os.path.exists('frames'):
-    os.makedirs('frames')
-
-if not os.path.exists('frames/frames_GX011088'):
-    os.makedirs('frames/frames_GX011088')
-
-video_path = 'videos/GX011088_no_audio.MP4' # some problems with cv2 and mp4 files when there is audio, so I made a copy of the video without audio
-xml_path = 'annotations.xml'
-
-frame_numbers = parse_xml(xml_path)
-
-cap = cv2.VideoCapture(video_path)
-
-current_frame = 0
-
-while True:
-    success, frame = cap.read()
-    if not success:
-        break
-    if current_frame in frame_numbers:
-        frame_path = f'frames/frames_GX011088/frame_{current_frame}.png'
-        cv2.imwrite(frame_path, frame)
-    current_frame += 1
-
-cap.release()
+    return frame_numbers
 
 
+def create_frames_directory(base_path, video_name):
+    frames_dir = os.path.join(base_path, f'frames_{video_name}')
+    if not os.path.exists(frames_dir):
+        os.makedirs(frames_dir)
+    return frames_dir
+
+
+def extract_frames(video_path, frame_numbers, output_dir):
+    cap = cv2.VideoCapture(video_path)
+    current_frame = 0
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        if current_frame in frame_numbers:
+            frame_path = os.path.join(output_dir, f'frame_{current_frame}.png')
+            cv2.imwrite(frame_path, frame)
+
+        current_frame += 1
+
+    cap.release()
+
+
+def main(video_name, video_path, xml_path):
+    frame_numbers = parse_xml(xml_path)
+    frames_dir = create_frames_directory('frames', video_name)
+    extract_frames(video_path, frame_numbers, frames_dir)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Extract frames based on XML annotations.')
+    parser.add_argument('video_name', type=str, help='The name of the video.')
+    parser.add_argument('video_path', type=str, help='The path to the video file.')
+    parser.add_argument('xml_path', type=str, help='The path to the XML file with annotations.')
+
+    args = parser.parse_args()
+
+    main(args.video_name, args.video_path, args.xml_path)

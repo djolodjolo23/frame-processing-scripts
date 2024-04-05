@@ -3,30 +3,32 @@ import xml.etree.ElementTree as ET
 import os
 import argparse
 
-parser = argparse.ArgumentParser(description='Process images and annotations for object detection.')
-parser.add_argument('--target_image_size', type=int, default=244, help='Target image size for the square crop.')
-parser.add_argument('--video_name', type=str, required=True, help='Name of the video for processing.')
-parser.add_argument('--initial_xml', type=str, required=True, help='Path to the initial XML annotations file.')
+#parser = argparse.ArgumentParser(description='Process images and annotations for object detection.')
+#parser.add_argument('target_image_size', type=int, help='Target image size for the square crop.')
+#parser.add_argument('video_name', type=str, help='Name of the video for processing.')
+#parser.add_argument('annotation_path', type=str, help='Path to the initial XML annotations file.')
 
-args = parser.parse_args()
+#args = parser.parse_args()
 
-target_image_size = args.target_image_size
-video_name = args.video_name
-initial_xml = args.initial_xml
+target_image_size = 244
+video_name = 'GX0110087'
+annotation_path = 'annotations/annotations_87.xml'
 
 additional_padding = 10
-
 
 cropped_folder_path = f'cropped/{video_name}'
 os.makedirs(cropped_folder_path, exist_ok=True)
 
-tree = ET.parse(initial_xml)
+print(f"Processing annotations from: {annotation_path}")
+
+tree = ET.parse(annotation_path)
 root = tree.getroot()
 
 for track in root.findall('.//track'):
     if track.attrib.get('label') == 'queen':
         for box in track.findall('box'):
             frame_num = box.attrib['frame']
+            print(f"Processing frame: {frame_num}")
 
             image_path = os.path.join(f'frames/frames_{video_name}/frame_{frame_num}.png')
             if not os.path.exists(image_path):
@@ -82,8 +84,8 @@ for track in root.findall('.//track'):
 
             draw = ImageDraw.Draw(new_image)
 
-            #TODO: if you want to check if the bounding boxes within the cropped images are correct, uncomment the following line
-           #draw.rectangle([new_tlx, new_tly, new_brx, new_bry], outline='red', width=2) #test
+            # TODO: if you want to check if the bounding boxes within the cropped images are correct, uncomment the
+            #  following line draw.rectangle([new_tlx, new_tly, new_brx, new_bry], outline='red', width=2) #test
 
             new_image.save(f'cropped/{video_name}/cropped_frame{frame_num}.png')
             target_image_size = predefined_square_size_temp
