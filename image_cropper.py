@@ -81,7 +81,9 @@ for track in root.findall('.//track'):
             box.set('ybr', str(new_bry))
 
             draw = ImageDraw.Draw(new_image)
-            draw.rectangle([new_tlx, new_tly, new_brx, new_bry], outline='red', width=2) #test
+
+            #TODO: if you want to check if the bounding boxes within the cropped images are correct, uncomment the following line
+           #draw.rectangle([new_tlx, new_tly, new_brx, new_bry], outline='red', width=2) #test
 
             new_image.save(f'cropped/{video_name}/cropped_frame{frame_num}.png')
             target_image_size = predefined_square_size_temp
