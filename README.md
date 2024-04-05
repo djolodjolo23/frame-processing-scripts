@@ -3,7 +3,7 @@
 - Run the frame_extractor.py script to extract the frames from the video. The script can be run from the terminal with arguments:
   - ``python3 frame_extractor.py video_name video_path annotation_path``, where video_name is the name of the video file, video_path is the path to the video file, and annotation_path is the path to the annotation file.
 - An example:
-  - ```python3 frame_extractor.py 'GX0110088' 'videos/GX0110088_no_audio.MP4' annotations/annotations.xml```
+  - ```python3 frame_extractor.py 'GX0110088' 'videos/GX0110088_no_audio.MP4' 'annotations/annotations.xml'```
 
 - This will create the frames directory with the appropriate nested folder frames_video_name, and the extracted frames will be saved in this folder.
 - Run the image_cropper script to crop out the objects from the frames. The script can be run from the terminal with arguments:
