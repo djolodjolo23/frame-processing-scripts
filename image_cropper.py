@@ -3,16 +3,16 @@ import xml.etree.ElementTree as ET
 import os
 import argparse
 
-#parser = argparse.ArgumentParser(description='Process images and annotations for object detection.')
-#parser.add_argument('target_image_size', type=int, help='Target image size for the square crop.')
-#parser.add_argument('video_name', type=str, help='Name of the video for processing.')
-#parser.add_argument('annotation_path', type=str, help='Path to the initial XML annotations file.')
+parser = argparse.ArgumentParser(description='Process images and annotations for object detection.')
+parser.add_argument('target_image_size', type=int, help='Target image size for the square crop.')
+parser.add_argument('video_name', type=str, help='Name of the video for processing.')
+parser.add_argument('annotation_path', type=str, help='Path to the initial XML annotations file.')
 
-#args = parser.parse_args()
+args = parser.parse_args()
 
-target_image_size = 244
-video_name = 'GX0110087'
-annotation_path = 'annotations/annotations_87.xml'
+target_image_size = args.target_image_size
+video_name = args.video_name
+annotation_path = args.annotation_path
 
 additional_padding = 10
 
