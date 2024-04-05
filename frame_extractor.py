@@ -36,7 +36,7 @@ while True:
     if not success:
         break
     if current_frame in frame_numbers:
-        frame_path = f'frames/frames_GX011088/frame_{current_frame}.jpg'
+        frame_path = f'frames/frames_GX011088/frame_{current_frame}.png'
         cv2.imwrite(frame_path, frame)
     current_frame += 1
 
