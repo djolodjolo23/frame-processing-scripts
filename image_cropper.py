@@ -87,7 +87,7 @@ for track in root.findall('.//track'):
             # TODO: if you want to check if the bounding boxes within the cropped images are correct, uncomment the
             #  following line draw.rectangle([new_tlx, new_tly, new_brx, new_bry], outline='red', width=2) #test
 
-            new_image.save(f'cropped/{video_name}/cropped_frame{frame_num}.png')
+            new_image.save(f'cropped/{video_name}/cropped_frame_{frame_num}.png')
             target_image_size = predefined_square_size_temp
 
 new_xml_path = f'annotations_updated_{video_name}.xml'
