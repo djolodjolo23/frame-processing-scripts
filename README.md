@@ -1,4 +1,4 @@
-# How to use the scripts
+# How to use scripts
 - Install necessary packages.
 - Run the frame_extractor.py script to extract the frames from the video. The script can be run from the terminal with arguments:
   - ``python3 frame_extractor.py video_name video_path annotation_path``, where video_name is the name of the video file, video_path is the path to the video file, and annotation_path is the path to the annotation file.
@@ -12,3 +12,4 @@
   - ```python3 image_cropper.py 244 'GX0110088' 'annotations/annotations.xml'```
 
 Note that video_name parameter is just to create a folder with appropriate video name for easier navigation. 
+Make sure you have enough space on your disk to store the frames.

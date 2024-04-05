@@ -33,6 +33,7 @@ def extract_frames(video_path, frame_numbers, output_dir):
             break
         if current_frame in frame_numbers:
             frame_path = os.path.join(output_dir, f'frame_{current_frame}.png')
+            print(f"Saving frame: {frame_path}")
             cv2.imwrite(frame_path, frame)
 
         current_frame += 1
