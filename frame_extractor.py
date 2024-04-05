@@ -22,7 +22,7 @@ if not os.path.exists('frames'):
 if not os.path.exists('frames/frames_GX011088'):
     os.makedirs('frames/frames_GX011088')
 
-video_path = 'GX011088_no_audio.MP4' # some problems with cv2 and mp4 files when there is audio, so I made a copy of the video without audio
+video_path = 'videos/GX011088_no_audio.MP4' # some problems with cv2 and mp4 files when there is audio, so I made a copy of the video without audio
 xml_path = 'annotations.xml'
 
 frame_numbers = parse_xml(xml_path)
@@ -39,9 +39,6 @@ while True:
         frame_path = f'frames/frames_GX011088/frame_{current_frame}.jpg'
         cv2.imwrite(frame_path, frame)
     current_frame += 1
-
-    if current_frame == 359:  # stopping point for now
-        break
 
 cap.release()
 
