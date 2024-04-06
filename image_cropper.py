@@ -17,8 +17,8 @@ annotation_path = args.annotation_path
 
 additional_padding = 10
 
-cropped_folder_path = f'cropped/{video_name}/frames'
-cropped_annotations_folder_path = f'cropped/{video_name}/annotations'
+cropped_folder_path = f'cropped/{video_name}/frames_{target_image_size}'
+cropped_annotations_folder_path = f'cropped/{video_name}/annotations_{target_image_size}'
 os.makedirs(cropped_folder_path, exist_ok=True)
 os.makedirs(cropped_annotations_folder_path, exist_ok=True)
 
