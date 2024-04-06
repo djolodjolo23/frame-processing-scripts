@@ -4,16 +4,16 @@ import os
 import argparse
 from pascal_voc import write_pascal_voc
 
-#parser = argparse.ArgumentParser(description='Process images and annotations_CVAT for object detection.')
-#parser.add_argument('target_image_size', type=int, help='Target image size for the square crop.')
-#parser.add_argument('video_name', type=str, help='Name of the video for processing.')
-#parser.add_argument('annotation_path', type=str, help='Path to the initial XML annotations_CVAT file.')
+parser = argparse.ArgumentParser(description='Process images and annotations_CVAT for object detection.')
+parser.add_argument('target_image_size', type=int, help='Target image size for the square crop.')
+parser.add_argument('video_name', type=str, help='Name of the video for processing.')
+parser.add_argument('annotation_path', type=str, help='Path to the initial XML annotations_CVAT file.')
 
-#args = parser.parse_args()
+args = parser.parse_args()
 
-target_image_size = 244
-video_name = 'GX0110088'
-annotation_path = 'annotations_CVAT/annotations_88.xml'
+target_image_size = args.target_image_size
+video_name = args.video_name
+annotation_path = args.annotation_path
 
 additional_padding = 10
 
