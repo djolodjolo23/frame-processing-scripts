@@ -48,10 +48,10 @@ def main(video_name, video_path, xml_path):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Extract frames based on XML annotations.')
+    parser = argparse.ArgumentParser(description='Extract frames based on XML annotations_CVAT.')
     parser.add_argument('video_name', type=str, help='The name of the video.')
     parser.add_argument('video_path', type=str, help='The path to the video file.')
-    parser.add_argument('xml_path', type=str, help='The path to the XML file with annotations.')
+    parser.add_argument('xml_path', type=str, help='The path to the XML file with annotations_CVAT.')
 
     args = parser.parse_args()
 

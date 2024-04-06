@@ -3,10 +3,10 @@ import xml.etree.ElementTree as ET
 import os
 import argparse
 
-parser = argparse.ArgumentParser(description='Process images and annotations for object detection.')
+parser = argparse.ArgumentParser(description='Process images and annotations_CVAT for object detection.')
 parser.add_argument('target_image_size', type=int, help='Target image size for the square crop.')
 parser.add_argument('video_name', type=str, help='Name of the video for processing.')
-parser.add_argument('annotation_path', type=str, help='Path to the initial XML annotations file.')
+parser.add_argument('annotation_path', type=str, help='Path to the initial XML annotations_CVAT file.')
 
 args = parser.parse_args()
 
@@ -19,7 +19,7 @@ additional_padding = 10
 cropped_folder_path = f'cropped/{video_name}'
 os.makedirs(cropped_folder_path, exist_ok=True)
 
-print(f"Processing annotations from: {annotation_path}")
+print(f"Processing annotations_CVAT from: {annotation_path}")
 
 tree = ET.parse(annotation_path)
 root = tree.getroot()
@@ -30,7 +30,7 @@ for track in root.findall('.//track'):
             frame_num = box.attrib['frame']
             print(f"Processing frame: {frame_num}")
 
-            image_path = os.path.join(f'frames/frames_{video_name}/frame_{frame_num}.png')
+            image_path = os.path.join(f'frames/{video_name}/frame_{frame_num}.png')
             if not os.path.exists(image_path):
                 continue
 
@@ -85,10 +85,11 @@ for track in root.findall('.//track'):
             draw = ImageDraw.Draw(new_image)
 
             # TODO: if you want to check if the bounding boxes within the cropped images are correct, uncomment the
-            #  following line draw.rectangle([new_tlx, new_tly, new_brx, new_bry], outline='red', width=2) #test
+            #  following line
+            #draw.rectangle([new_tlx, new_tly, new_brx, new_bry], outline='red', width=2) #test
 
-            new_image.save(f'cropped/{video_name}/cropped_frame_{frame_num}.png')
+            new_image.save(f'cropped/{video_name}/frame_{frame_num}.png')
             target_image_size = predefined_square_size_temp
 
-new_xml_path = f'annotations_updated_{video_name}.xml'
+new_xml_path = os.path.join(cropped_folder_path, 'annotations.xml')
 tree.write(new_xml_path)
