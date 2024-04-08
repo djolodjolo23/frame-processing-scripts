@@ -2,6 +2,7 @@
 import cv2
 import os
 import xml.etree.ElementTree as ET
+from pascal_voc import write_pascal_voc
 
 
 target_image_width = 1020 #maintain 4:3 ratio
@@ -40,6 +41,15 @@ for track in root.findall('.//track'):
 
             cv2.imwrite(f'{compressed_folder_path}/frame_{frame_num}.png', resized_image)
             print(f"Image saved to: {compressed_folder_path}/frame_{frame_num}.png")
+
+            resize_ratio = target_image_width / original_image.shape[1]
+
+            new_xtl = xtl * resize_ratio
+            new_ytl = ytl * resize_ratio
+            new_xbr = xbr * resize_ratio
+            new_ybr = ybr * resize_ratio
+
+            #write_pascal_voc(f'{cropped_annotations_folderpath}/frame_{frame_num}.xml', f'frame_{frame_num}.png', target_image_width, new_xtl, new_ytl, new_xbr, new_ybr)
 
             # resizing the image and saving works fine
             #TODO: resize the bounding box with appropriate ratio, save to a new xml file, create pascal-voc xml file for each image based on the new bounding box.

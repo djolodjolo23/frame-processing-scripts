@@ -92,7 +92,7 @@ for track in root.findall('.//track'):
 
             draw = ImageDraw.Draw(new_image)
 
-            write_pascal_voc(f'{cropped_annotations_folder_path}/frame_{frame_num}.xml', f'frame_{frame_num}.png', predefined_square_size_temp, new_xtl, new_ytl, new_xbr, new_ybr)
+            write_pascal_voc(f'{cropped_annotations_folder_path}/frame_{frame_num}.xml', f'frame_{frame_num}.png', predefined_square_size_temp, predefined_square_size_temp, new_xtl, new_ytl, new_xbr, new_ybr)
 
             # TODO: if you want to check if the bounding boxes within the cropped images are correct, uncomment the
             #  following line

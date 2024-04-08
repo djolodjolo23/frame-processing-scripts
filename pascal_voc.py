@@ -1,6 +1,6 @@
 
 
-def write_pascal_voc(file_path, filename, square_edge, xtl, ytl, xbr, ybr):
+def write_pascal_voc(file_path, filename, width, height, xtl, ytl, xbr, ybr):
     with open(file_path, 'w') as file:
         xml_content = f'''<annotation>
           <folder>frame</folder>
@@ -11,8 +11,8 @@ def write_pascal_voc(file_path, filename, square_edge, xtl, ytl, xbr, ybr):
             <image>Unknown</image>
           </source>
           <size>
-            <width>{square_edge}</width>
-            <height>{square_edge}</height>
+            <width>{width}</width>
+            <height>{height}</height>
             <depth></depth>
           </size>
           <segmented>0</segmented>
