@@ -18,7 +18,7 @@ def parse_xml(xml_file):
 
 
 def create_frames_directory(base_path, video_name):
-    frames_dir = os.path.join(base_path, f'frames_{video_name}')
+    frames_dir = os.path.join(base_path, f'{video_name}')
     if not os.path.exists(frames_dir):
         os.makedirs(frames_dir)
     return frames_dir
