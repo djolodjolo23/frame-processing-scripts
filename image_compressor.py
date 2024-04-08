@@ -33,11 +33,15 @@ for track in root.findall('.//track'):
             original_image = cv2.imread(image_path)
             xtl, ytl, xbr, ybr = [float(box.attrib[attr]) for attr in ['xtl', 'ytl', 'xbr', 'ybr']]
 
+            bbox_width = xbr - xtl
+            bbox_height = ybr - ytl
+
             resized_image = cv2.resize(original_image, (target_image_width, target_image_height))
 
             cv2.imwrite(f'{compressed_folder_path}/frame_{frame_num}.png', resized_image)
             print(f"Image saved to: {compressed_folder_path}/frame_{frame_num}.png")
 
+            # resizing the image and saving works fine
+            #TODO: resize the bounding box with appropriate ratio, save to a new xml file, create pascal-voc xml file for each image based on the new bounding box.
             
             
-                
