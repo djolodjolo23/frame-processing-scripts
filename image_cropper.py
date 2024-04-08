@@ -10,12 +10,13 @@ parser.add_argument('video_name', type=str, help='Name of the video for processi
 parser.add_argument('annotation_path', type=str, help='Path to the initial XML annotations_CVAT file.')
 
 args = parser.parse_args()
+# TODO: if you don't want to use script with arguments comment the lines above
 
 target_image_size = args.target_image_size
 video_name = args.video_name
 annotation_path = args.annotation_path
 
-additional_padding = 10
+additional_padding = 500 # FOMO needs object to appear smaller
 
 cropped_folder_path = f'cropped/{video_name}/frames_{target_image_size}'
 cropped_annotations_folder_path = f'cropped/{video_name}/annotations_{target_image_size}'
@@ -37,6 +38,9 @@ for track in root.findall('.//track'):
             if not os.path.exists(image_path):
                 continue
 
+            if frame_num == '263':
+                print('debug')
+
             original_image = Image.open(image_path)
             xtl, ytl, xbr, ybr = [float(box.attrib[attr]) for attr in ['xtl', 'ytl', 'xbr', 'ybr']]
 
@@ -46,8 +50,9 @@ for track in root.findall('.//track'):
             initial_square_size = max(bbox_width, bbox_height)
 
             predefined_square_size_temp = target_image_size
-            if initial_square_size > target_image_size: # if the bbox is larger than the predefined square size
+            if initial_square_size > target_image_size or initial_square_size > target_image_size / 2 + 40: # if the object is too big, we need to resize it, fomo does not do well with large objects
                 target_image_size = round(initial_square_size) + additional_padding # adding predefined padding pixels to the square size to make sure the object is not cropped out
+
 
             padding_height = (target_image_size - bbox_height) / 2
             padding_width = (target_image_size - bbox_width) / 2
@@ -91,7 +96,7 @@ for track in root.findall('.//track'):
 
             # TODO: if you want to check if the bounding boxes within the cropped images are correct, uncomment the
             #  following line
-            #draw.rectangle([new_tlx, new_tly, new_brx, new_bry], outline='red', width=2) #test
+            #draw.rectangle([new_xtl, new_ytl, new_xbr, new_ybr], outline='red', width=2) #test
 
             new_image.save(f'{cropped_folder_path}/frame_{frame_num}.png')
             target_image_size = predefined_square_size_temp
