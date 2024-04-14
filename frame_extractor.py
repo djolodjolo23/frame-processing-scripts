@@ -35,8 +35,8 @@ def extract_frames(video_path, frame_numbers, output_dir):
             frame_path = os.path.join(output_dir, f'frame_{current_frame}.png')
             print(f"Saving frame: {frame_path}")
             cv2.imwrite(frame_path, frame)
-            if current_frame == 11950: # stop for now
-                break
+            #if current_frame == 11950: # stop for now
+                #break
 
         current_frame += 1
 
