@@ -16,7 +16,7 @@ target_image_size = args.target_image_size
 video_name = args.video_name
 annotation_path = args.annotation_path
 
-additional_padding = 500 # FOMO needs object to appear smaller
+additional_padding = 700 # FOMO needs object to appear smaller
 
 cropped_folder_path = f'cropped/{video_name}/frames_{target_image_size}'
 cropped_annotations_folder_path = f'cropped/{video_name}/annotations_{target_image_size}'
@@ -101,5 +101,5 @@ for track in root.findall('.//track'):
             new_image.save(f'{cropped_folder_path}/frame_{frame_num}.png')
             target_image_size = predefined_square_size_temp
 
-new_xml_path = os.path.join(cropped_folder_path, 'annotations.xml')
+new_xml_path = os.path.join(cropped_folder_path, 'Annotations.xml')
 tree.write(new_xml_path)
