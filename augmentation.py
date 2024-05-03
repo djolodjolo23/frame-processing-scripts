@@ -91,6 +91,7 @@ def main():
         xml_file = img_file.replace('.png', '.xml')
         xml_path = os.path.join(xml_dir, xml_file)
 
+        # create two augmented images for each image, change the range to create more
         for i in range(2): 
             augment_image(image_path, xml_path, save_dir, f"aug_{i}")
 
