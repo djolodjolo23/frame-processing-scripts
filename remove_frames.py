@@ -13,7 +13,7 @@ def process_files(folder_path):
         print(f"Keeping: {files[i]}")
         
         # Skip the next four files and delete them
-        for _ in range(3):
+        for _ in range(4):
             i += 1
             if i < len(files):
                 file_to_delete = os.path.join(folder_path, files[i])
