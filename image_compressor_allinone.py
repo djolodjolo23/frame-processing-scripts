@@ -7,8 +7,8 @@ from PIL import Image, ImageDraw
 target_image_width = 320
 target_image_height = 320
 
-compressed_folder_path = f'compressed/micro_all_frames/frames'
-compressed_annotations_folderpath = f'compressed/micro_all_frames/annotations'
+compressed_folder_path = f'compressed/micro_all_frames_training/images'
+compressed_annotations_folderpath = f'compressed/micro_all_frames_training/annotations'
 os.makedirs(compressed_folder_path, exist_ok=True)
 os.makedirs(compressed_annotations_folderpath, exist_ok=True)
 
@@ -51,7 +51,7 @@ def process(annotation_path, video_name, frame_counter):
 frame_counter = 1
 
 for file in os.listdir('videos/'):
-    if file.endswith('.webm'):
+    if file.endswith('.webm') and not file.endswith('6.webm') and not file.endswith('11.webm') and not file.endswith('12.webm') and not file.endswith('13.webm') and not file.endswith('14.webm') and not file.endswith('15.webm') and not file.endswith('16.webm') and not file.endswith('17.webm'):
         video_name = file.split('.')[0]
         annotation_num = video_name[-2:] if video_name[-2:].isdigit() else video_name[-1]
         current_annotation = f'annotations_CVAT/micro{annotation_num}.xml'

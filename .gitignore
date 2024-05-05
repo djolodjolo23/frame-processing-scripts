@@ -8,3 +8,7 @@ image_cropper_venv
 cropped
 videos
 compressed
+/augmented
+/venv
+/.idea
+/__pycache__

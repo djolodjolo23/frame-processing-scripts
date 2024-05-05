@@ -4,6 +4,9 @@ import albumentations as A
 from albumentations.augmentations import transforms
 from lxml import etree
 from shutil import copyfile
+import random
+import numpy as np
+
 
 def read_xml(file_path):
     tree = etree.parse(file_path)
@@ -31,28 +34,29 @@ def write_xml(boxes, original_file, new_file):
         root.find('filename').text = os.path.basename(new_file).replace('.xml', '.png')
     tree.write(new_file)
 
-def augment_image(image_path, xml_path, save_dir, prefix):
+def augment_image(image_path, xml_path, save_dir, prefix, seed):
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     boxes = read_xml(xml_path)
+
+    random.seed(seed)
+    np.random.seed(seed)    
 
     # augmentation
     transform = A.Compose([
         # apply horizontal flip with 50% probability
         A.HorizontalFlip(p=0.5),
-        # apply vertical flip with 50% probability
-        A.Rotate(limit=40, p=0.5, border_mode=cv2.BORDER_REFLECT),
+        A.VerticalFlip(p=0.5),
         # apply brightness and contrast adjustments with 50% probability
-        A.RandomBrightnessContrast(p=0.5),
-
-        A.PadIfNeeded(min_height=320, min_width=320, border_mode=cv2.BORDER_REFLECT),
+        A.RandomBrightnessContrast(brightness_limit=0.05, contrast_limit=0.05, p=0.5),  # Adjust brightness and contrast
         
         # additional Augmentations 
         # apply perspective transformations to mimic different viewing angles
         # A.Perspective(scale=(0.05, 0.1), p=0.5),
 
-        # randomly crop and resize parts of the image to focus on the queen bee
-        # A.RandomResizedCrop(height=320, width=320, scale=(0.8, 1.0), p=0.5),
+        A.RandomResizedCrop(height=320, width=320, scale=(0.9, 1.0), p=0.5),
+        A.PadIfNeeded(min_height=320, min_width=320, border_mode=cv2.BORDER_REFLECT)  # Pad if needed after crop to maintain size 320x320
+
 
         # adjust hue, saturation, and value to handle different lighting and color variations
         # A.HueSaturationValue(hue_shift_limit=20, sat_shift_limit=30, val_shift_limit=20, p=0.5),
@@ -67,8 +71,10 @@ def augment_image(image_path, xml_path, save_dir, prefix):
 
     transformed = transform(image=image, bboxes=boxes)
     transformed_image = transformed['image']
-    transformed_image = cv2.cvtColor(transformed_image, cv2.COLOR_RGB2BGR)
     transformed_bboxes = transformed['bboxes']
+
+    transformed_image = cv2.cvtColor(transformed_image, cv2.COLOR_RGB2BGR)
+
 
     img_save_path = os.path.join(save_dir, 'images', f"{prefix}_{os.path.basename(image_path)}")
     xml_save_path = os.path.join(save_dir, 'annotations', f"{prefix}_{os.path.basename(xml_path)}")
@@ -78,9 +84,9 @@ def augment_image(image_path, xml_path, save_dir, prefix):
 
 def main():
     # TODO: Set the paths, image_dir and xml_dir are original images and annotations, save_dir is the directory to save augmented images and annotations
-    image_dir = 'dataset/images'
-    xml_dir = 'dataset/annotations'
-    save_dir = 'dataset/augmented'
+    image_dir = 'compressed/micro_all_frames_training/images'
+    xml_dir = 'compressed/micro_all_frames_training/annotations'
+    save_dir = 'augmented'
 
     os.makedirs(os.path.join(save_dir, 'images'), exist_ok=True)
     os.makedirs(os.path.join(save_dir, 'annotations'), exist_ok=True)
@@ -93,7 +99,7 @@ def main():
 
         # create two augmented images for each image, change the range to create more
         for i in range(2): 
-            augment_image(image_path, xml_path, save_dir, f"aug_{i}")
+            augment_image(image_path, xml_path, save_dir, f"aug_{i}", seed=i + 123456)  
 
 if __name__ == '__main__':
     main()

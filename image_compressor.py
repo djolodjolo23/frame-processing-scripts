@@ -9,8 +9,8 @@ from PIL import Image, ImageDraw
 
 target_image_width = 320 #maintain 4:3 ratio
 target_image_height = 320 # maitain 4:3 ratio
-video_name = 'micro3'
-annotation_path = 'annotations_CVAT/micro3.xml'
+video_name = 'micro11'
+annotation_path = 'annotations_CVAT/micro11.xml'
 
 
 compressed_folder_path = f'compressed/{video_name}/frames_{target_image_width} x {target_image_height}'
