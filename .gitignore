@@ -9,6 +9,7 @@ cropped
 videos
 compressed
 /augmented
+/augmented-v2
 /venv
 /.idea
 /__pycache__
