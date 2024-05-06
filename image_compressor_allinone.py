@@ -7,8 +7,8 @@ from PIL import Image, ImageDraw
 target_image_width = 320
 target_image_height = 320
 
-compressed_folder_path = f'compressed/micro_all_frames_training/images'
-compressed_annotations_folderpath = f'compressed/micro_all_frames_training/annotations'
+compressed_folder_path = f'compressed/micro_all_frames/images'
+compressed_annotations_folderpath = f'compressed/micro_all_frames/annotations'
 os.makedirs(compressed_folder_path, exist_ok=True)
 os.makedirs(compressed_annotations_folderpath, exist_ok=True)
 
@@ -58,18 +58,21 @@ for file in os.listdir('videos/'):
         frame_counter = process(current_annotation, video_name, frame_counter)  # Update frame_counter with the returned value
 
 for i in range(1, 6):
-    os.makedirs(f'compressed/micro_all_frames_training_{i}/images', exist_ok=True)
-    os.makedirs(f'compressed/micro_all_frames_training_{i}/annotations', exist_ok=True)
+    os.makedirs(f'compressed/micro_all_frames{i}/training/images', exist_ok=True)
+    os.makedirs(f'compressed/micro_all_frames{i}/training/annotations', exist_ok=True)
+    os.makedirs(f'compressed/micro_all_frames{i}/testing/images', exist_ok=True)
+    os.makedirs(f'compressed/micro_all_frames{i}/testing/annotations', exist_ok=True)
 
 # create 5 splits of the dataset, 80% training, 20% testing and put them in the respective folders
 
 for i in range(1, 6):
-    image_folder = f'compressed/micro_all_frames_training_{i}/images'
-    annotation_folder = f'compressed/micro_all_frames_training_{i}/annotations'
     for file in os.listdir(compressed_folder_path):
         if file.endswith('.png'):
-            image_path = os.path.join(compressed_folder_path, file)
-            annotation_path = os.path.join(compressed_annotations_folderpath, file.replace('.png', '.xml'))
-            if int(file.split('_')[1].split('.')[0]) % 5 == i: 
-                os.rename(image_path, os.path.join(image_folder, file))
-                os.rename(annotation_path, os.path.join(annotation_folder, file.replace('.png', '.xml')))
+            image_path = f'{compressed_folder_path}/{file}'
+            annotation_path = f'{compressed_annotations_folderpath}/{file.split(".")[0]}.xml'
+            if int(file.split('_')[1].split('.')[0]) % 5 == i:
+                os.rename(image_path, f'compressed/micro_all_frames{i}/testing/images/{file}')
+                os.rename(annotation_path, f'compressed/micro_all_frames{i}/testing/annotations/{file.split(".")[0]}.xml')
+            else:
+                os.rename(image_path, f'compressed/micro_all_frames{i}/training/images/{file}')
+                os.rename(annotation_path, f'compressed/micro_all_frames{i}/training/annotations/{file.split(".")[0]}.xml')
