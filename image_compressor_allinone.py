@@ -3,6 +3,7 @@ import os
 import xml.etree.ElementTree as ET
 from pascal_voc import write_pascal_voc
 from PIL import Image, ImageDraw
+import shutil
 
 target_image_width = 320
 target_image_height = 320
@@ -71,8 +72,9 @@ for i in range(1, 6):
             image_path = f'{compressed_folder_path}/{file}'
             annotation_path = f'{compressed_annotations_folderpath}/{file.split(".")[0]}.xml'
             if int(file.split('_')[1].split('.')[0]) % 5 == i:
-                os.rename(image_path, f'compressed/micro_all_frames{i}/testing/images/{file}')
-                os.rename(annotation_path, f'compressed/micro_all_frames{i}/testing/annotations/{file.split(".")[0]}.xml')
+                # copy file to testing
+                shutil.copy(image_path, f'compressed/micro_all_frames{i}/testing/images/{file}')
+                shutil.copy(annotation_path, f'compressed/micro_all_frames{i}/testing/annotations/{file.split(".")[0]}.xml')
             else:
-                os.rename(image_path, f'compressed/micro_all_frames{i}/training/images/{file}')
-                os.rename(annotation_path, f'compressed/micro_all_frames{i}/training/annotations/{file.split(".")[0]}.xml')
+                shutil.copy(image_path, f'compressed/micro_all_frames{i}/training/images/{file}')
+                shutil.copy(annotation_path, f'compressed/micro_all_frames{i}/training/annotations/{file.split(".")[0]}.xml')
