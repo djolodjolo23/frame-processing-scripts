@@ -10,6 +10,6 @@ videos
 compressed
 /augmented
 /augmented-v2
-/venv
+venv/
 /.idea
 /__pycache__
