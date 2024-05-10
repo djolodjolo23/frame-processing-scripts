@@ -10,12 +10,11 @@ def calculate_iou(box1, box2):
     x1, y1, w1, h1 = box1
     x2, y2, w2, h2 = box2
     xi1, yi1 = max(x1, x2), max(y1, y2)
-    xi2, yi2 = min(x1 + w1, x2 + w2), min(y1 + h1, y2 + h2)
+    xi2, yi2 = min(x1+w1, x2+w2), min(y1+h1, y2+h2)
     wi, hi = max(0, xi2 - xi1), max(0, yi2 - yi1)
     inter = wi * hi
-    union = w1 * h1 + w2 * h2 - inter
+    union = w1*h1 + w2*h2 - inter
     return inter / union
-
 
 def parse_voc_annotation(file_path):
     tree = ET.parse(file_path)
@@ -30,13 +29,31 @@ def parse_voc_annotation(file_path):
         objects.append((xtl, ytl, xbr, ybr))
     return objects
 
+# Additional functionality to calculate precision at multiple IoU thresholds
+def calculate_precision_at_thresholds(matches_dict, ground_truths, predictions, thresholds):
+    for iou_threshold in thresholds:
+        matches = matches_dict.setdefault(iou_threshold, [])
+        if predictions:
+            for pred_box in predictions:
+                matched = False
+                for gt_box in ground_truths:
+                    iou = calculate_iou(pred_box, (gt_box[0], gt_box[1], gt_box[2], gt_box[3]))
+                    if iou >= iou_threshold:
+                        matched = True
+                        break
+                matches.append(int(matched))
+        else:
+            matches.extend([0] * len(ground_truths))  # No predictions mean zero matches
+
+def calculate_map(precisions):
+    return {threshold: sum(matches) / len(matches) if matches else 0 for threshold, matches in precisions.items()}
 
 def calculate_new_bbox(ground_truth, original_height, target_size, the_image):
     xtl, ytl, xbr, ybr = ground_truth
     bbox_width = xbr - xtl
     bbox_height = ybr - ytl
 
-    width_diff = 640 - 480  # 640 is the original width of the image
+    width_diff = 640-480 # 640 is the original width of the image
     xtl = xtl - width_diff / 2
     xbr = xbr - width_diff / 2
 
@@ -47,11 +64,22 @@ def calculate_new_bbox(ground_truth, original_height, target_size, the_image):
     bbox_height = bbox_height * resize_ratio
 
     # = Image.fromarray(the_image)
-    # draw = ImageDraw.Draw(image)
-    # draw.rectangle([xtl, ytl, xtl + bbox_width, ytl + bbox_height], outline="red", width=2)
-    # image.save(os.path.join(output_dir, "new_" + img_filename))
+    #draw = ImageDraw.Draw(image)
+    #draw.rectangle([xtl, ytl, xtl + bbox_width, ytl + bbox_height], outline="red", width=2)
+    #image.save(os.path.join(output_dir, "new_" + img_filename))
 
     return [(xtl, ytl, bbox_width, bbox_height)]
+
+def resize_image_fit_shortest_axis(img):
+    h, w = img.shape[:2]
+    if w > h:
+        diff = w - h
+        image = img[:, diff//2:w-diff//2]
+    else:
+        diff = h - w
+        image = img[diff//2:h-diff//2]
+    image = cv2.resize(image, (320, 320))
+    return image
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -59,34 +87,26 @@ model_path = os.path.join(dir_path, "rpi-yolo-final-320-1-linux-x86_64-v3.eim")
 image_dir = os.path.join(dir_path, "images")
 
 annotation_dir = os.path.join(dir_path, "annotations")
-# output_dir = os.path.join(dir_path, "new_testing_images")
-# os.makedirs(output_dir, exist_ok=True)
+#output_dir = os.path.join(dir_path, "new_testing_images")
+#os.makedirs(output_dir, exist_ok=True)
 
 runner = ImageImpulseRunner(model_path)
 model_info = runner.init()
 print("Model initialized:", model_info)
 
-precisions = []
+# Main processing
+iou_thresholds = np.arange(0.5, 1.0, 0.05)
+iou_thresholds = np.round(iou_thresholds, 2)  # Round to two decimal places
+# Ensuring that 0.95 is included in the thresholds
+if 0.95 not in iou_thresholds:
+    iou_thresholds = np.append(iou_thresholds, 0.95)
+precisions = {threshold: [] for threshold in iou_thresholds}
 
-
-def resize_image_fit_shortest_axis(img):
-    h, w = img.shape[:2]
-    if w > h:
-        diff = w - h
-        # crop half of the difference from the left and right
-        image = img[:, diff // 2:w - diff // 2]
-    else:
-        diff = h - w
-        # crop half of the difference from the top and bottom
-        image = img[diff // 2:h - diff // 2]
-    image = cv2.resize(image, (320, 320))
-    return image
-
+average_precisions = []
 
 for img_filename in os.listdir(image_dir):
     img_path = os.path.join(image_dir, img_filename)
     img = cv2.imread(img_path, cv2.IMREAD_COLOR)
-    original_img = img.copy()  # Make a copy for drawing and saving
     img = resize_image_fit_shortest_axis(img)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
@@ -95,28 +115,17 @@ for img_filename in os.listdir(image_dir):
 
     annotation_path = os.path.join(annotation_dir, os.path.splitext(img_filename)[0] + ".xml")
     ground_truths = parse_voc_annotation(annotation_path)
-
     new_ground_truths = calculate_new_bbox(ground_truths[0], 480, 320, img)
 
-    matches = []
+    predicted_boxes = []
     if "bounding_boxes" in res["result"]:
-        for bb in res["result"]["bounding_boxes"]:
-            pred_box = (bb['x'], bb['y'], bb['width'], bb['height'])
-            for gt_box in new_ground_truths:
-                iou = calculate_iou(pred_box, (gt_box[0], gt_box[1], gt_box[2], gt_box[3]))
-                if iou >= 0.5:
-                    print("Matched", pred_box, gt_box, iou)
-                    matches.append(1)
-                    break
-            else:
-                matches.append(0)
-                print("No match", pred_box)
-    if len(matches) > 0:
-        precision = sum(matches) / len(matches)
-    else:
-        precision = 0
-    precisions.append(precision)
-average_precision = sum(precisions) / len(precisions) if precisions else 0
-print("Average Precision at IoU >= 0.5:", average_precision)
+        predicted_boxes = [(bb['x'], bb['y'], bb['width'], bb['height']) for bb in res["result"]["bounding_boxes"]]
+
+    calculate_precision_at_thresholds(precisions, new_ground_truths, predicted_boxes, iou_thresholds)
+
+average_precisions = calculate_map(precisions)
+map_value = sum(average_precisions.values()) / len(average_precisions)
+print("Average Precisions:", average_precisions)
+print("Mean Average Precision (MaP):", map_value)
 
 runner.stop()
