@@ -3,12 +3,13 @@ import os
 import xml.etree.ElementTree as ET
 from pascal_voc import write_pascal_voc
 from PIL import Image, ImageDraw
+import shutil
 
 target_image_width = 320
 target_image_height = 320
 
-compressed_folder_path = f'compressed/micro_all_frames_training/images'
-compressed_annotations_folderpath = f'compressed/micro_all_frames_training/annotations'
+compressed_folder_path = f'compressed/micro_all_frames/images'
+compressed_annotations_folderpath = f'compressed/micro_all_frames/annotations'
 os.makedirs(compressed_folder_path, exist_ok=True)
 os.makedirs(compressed_annotations_folderpath, exist_ok=True)
 
@@ -51,8 +52,29 @@ def process(annotation_path, video_name, frame_counter):
 frame_counter = 1
 
 for file in os.listdir('videos/'):
-    if file.endswith('.webm') and not file.endswith('6.webm') and not file.endswith('11.webm') and not file.endswith('12.webm') and not file.endswith('13.webm') and not file.endswith('14.webm') and not file.endswith('15.webm') and not file.endswith('16.webm') and not file.endswith('17.webm'):
+    if file.endswith():
         video_name = file.split('.')[0]
         annotation_num = video_name[-2:] if video_name[-2:].isdigit() else video_name[-1]
         current_annotation = f'annotations_CVAT/micro{annotation_num}.xml'
         frame_counter = process(current_annotation, video_name, frame_counter)  # Update frame_counter with the returned value
+
+for i in range(1, 6):
+    os.makedirs(f'compressed/micro_all_frames{i}/training/images', exist_ok=True)
+    os.makedirs(f'compressed/micro_all_frames{i}/training/annotations', exist_ok=True)
+    os.makedirs(f'compressed/micro_all_frames{i}/testing/images', exist_ok=True)
+    os.makedirs(f'compressed/micro_all_frames{i}/testing/annotations', exist_ok=True)
+
+# create 5 splits of the dataset, 80% training, 20% testing and put them in the respective folders
+
+for i in range(1, 6):
+    for file in os.listdir(compressed_folder_path):
+        if file.endswith('.png'):
+            image_path = f'{compressed_folder_path}/{file}'
+            annotation_path = f'{compressed_annotations_folderpath}/{file.split(".")[0]}.xml'
+            if int(file.split('_')[1].split('.')[0]) % 5 == i:
+                # copy file to testing
+                shutil.copy(image_path, f'compressed/micro_all_frames{i}/testing/images/{file}')
+                shutil.copy(annotation_path, f'compressed/micro_all_frames{i}/testing/annotations/{file.split(".")[0]}.xml')
+            else:
+                shutil.copy(image_path, f'compressed/micro_all_frames{i}/training/images/{file}')
+                shutil.copy(annotation_path, f'compressed/micro_all_frames{i}/training/annotations/{file.split(".")[0]}.xml')
