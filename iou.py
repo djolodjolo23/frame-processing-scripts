@@ -40,12 +40,11 @@ def calculate_precision_at_thresholds(matches_dict, ground_truths, predictions, 
                     iou = calculate_iou(pred_box, (gt_box[0], gt_box[1], gt_box[2], gt_box[3]))
                     if iou >= iou_threshold:
                         matched = True
-                        # save the image with both bounding boxes
-                        if (iou <= iou_threshold + 0.05):
-                            recalculated_bboxes = [reverse_bbox_transform(gt_box, 480, 640, 320)]
-                            recalculated_predictions = [reverse_bbox_transform(pred_box, 480, 640, 320)]
-                            draw_both_bboxes(copied_img, recalculated_bboxes, recalculated_predictions, iou)
-                            #draw_both_bboxes(copied_img, ground_truths, predictions, iou)
+                        # save the image with both bounding boxes, for presentation
+                        #if (iou <= iou_threshold + 0.05):
+                            #recalculated_bboxes = [reverse_bbox_transform(gt_box, 480, 640, 320)]
+                            #recalculated_predictions = [reverse_bbox_transform(pred_box, 480, 640, 320)]
+                            #draw_both_bboxes(copied_img, recalculated_bboxes, recalculated_predictions, iou)
                         break
                 matches.append(int(matched))
         else:
@@ -60,7 +59,7 @@ def calculate_new_bbox(ground_truth, original_height, original_width, target_siz
         bbox_width = xbr - xtl
         bbox_height = ybr - ytl
 
-        width_diff = original_width-original_height # 640 is the original width of the image
+        width_diff = original_width-original_height 
         xtl = xtl - width_diff / 2
         xbr = xbr - width_diff / 2
         resize_ratio = target_size / original_height
@@ -68,36 +67,27 @@ def calculate_new_bbox(ground_truth, original_height, original_width, target_siz
         ytl = ytl * resize_ratio
         bbox_width = bbox_width * resize_ratio
         bbox_height = bbox_height * resize_ratio
-        # = Image.fromarray(the_image)
-        #draw = ImageDraw.Draw(image)
-        #draw.rectangle([xtl, ytl, xtl + bbox_width, ytl + bbox_height], outline="red", width=2)
-        #image.save(os.path.join(output_dir, "new_" + img_filename))
-
         return [(xtl, ytl, bbox_width, bbox_height)]
     else:
         bbox_width = ground_truth[2] - ground_truth[0]
         bbox_height = ground_truth[3] - ground_truth[1]
         return [(ground_truth[0], ground_truth[1], bbox_width, bbox_height)]
 
+# for presentation
 def reverse_bbox_transform(resized_bbox, original_height, original_width, target_size):
-    # Extract values from the resized bounding box
     xtl, ytl, resized_width, resized_height = resized_bbox
 
-    # Step 1: Reverse the scaling applied during the resize
     resize_ratio = target_size / original_height
     xtl /= resize_ratio
     ytl /= resize_ratio
     original_bbox_width = resized_width / resize_ratio
     original_bbox_height = resized_height / resize_ratio
 
-    # Step 2: Reverse the width difference adjustment (center alignment)
     width_diff = original_width - original_height
     xtl += width_diff / 2
 
-    # Create the original bounding box coordinates
     xbr = xtl + original_bbox_width
     ybr = ytl + original_bbox_height
-
     return (xtl, ytl, original_bbox_width, original_bbox_height)
 
 
@@ -111,6 +101,7 @@ def draw_both_bboxes(image, ground_truths, predicted_boxes, iou):
     for box in predicted_boxes:
         draw.rectangle([box[0], box[1], box[0] + box[2], box[1] + box[3]], outline="green", width=2)
     the_image.save(os.path.join(output_dir, f"{iou}_" + img_filename))
+    
 
 def resize_image_fit_shortest_axis(img):
     h, w = img.shape[:2]
@@ -138,8 +129,7 @@ print("Model initialized:", model_info)
 
 # Main processing
 iou_thresholds = np.arange(0.5, 1, 0.05)
-iou_thresholds = np.round(iou_thresholds, 2)  # Round to two decimal places
-# Ensuring that 0.95 is included in the thresholds
+iou_thresholds = np.round(iou_thresholds, 2) 
 if 0.95 not in iou_thresholds:
     iou_thresholds = np.append(iou_thresholds, 0.95)
 precisions = {threshold: [] for threshold in iou_thresholds}
@@ -152,8 +142,7 @@ for img_filename in os.listdir(image_dir):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     copied_img = img.copy()
     img = resize_image_fit_shortest_axis(img)
-    #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
+    
     features, cropped = runner.get_features_from_image(img)
     res = runner.classify(features)
 
