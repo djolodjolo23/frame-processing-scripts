@@ -54,6 +54,7 @@ def calculate_map(precisions):
     return {threshold: sum(matches) / len(matches) if matches else 0 for threshold, matches in precisions.items()}
 
 def calculate_new_bbox(ground_truth, original_height, original_width, target_size):
+    # in case of rpi images
     if (original_width != original_height):
         xtl, ytl, xbr, ybr = ground_truth
         bbox_width = xbr - xtl
@@ -68,6 +69,7 @@ def calculate_new_bbox(ground_truth, original_height, original_width, target_siz
         bbox_width = bbox_width * resize_ratio
         bbox_height = bbox_height * resize_ratio
         return [(xtl, ytl, bbox_width, bbox_height)]
+    # else, coral dev board micro images
     else:
         bbox_width = ground_truth[2] - ground_truth[0]
         bbox_height = ground_truth[3] - ground_truth[1]
