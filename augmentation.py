@@ -46,13 +46,12 @@ def augment_image(image_path, xml_path, save_dir, prefix, iteration):
 
     # augmentation
     transform = A.Compose([
-        # apply horizontal flip with 50% probability
         A.HorizontalFlip(p=0.5),
         A.VerticalFlip(p=0.5),
-        A.RandomBrightnessContrast(brightness_limit=0.1, contrast_limit=0.1, p=0.5),  # Adjust brightness and contrast
-        A.Rotate(limit=30, p=0.5),  # Rotate within a range of -20 to 20 degrees with a 50% probability
+        A.RandomBrightnessContrast(brightness_limit=0.1, contrast_limit=0.1, p=0.5),  
+        A.Rotate(limit=30, p=0.5), 
         A.RandomResizedCrop(height=320, width=320, scale=(0.9, 1.0), p=0.5),
-        A.PadIfNeeded(min_height=320, min_width=320, border_mode=cv2.BORDER_REFLECT)  # Pad if needed after crop to maintain size 320x320
+        A.PadIfNeeded(min_height=320, min_width=320, border_mode=cv2.BORDER_REFLECT)  
 
 
     ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=[]))
